@@ -139,6 +139,10 @@ for i = 1:1:3
     plot(time_span(1:int32(Ts / h):end), X_values(:, i) - 1738e3 * (i == 1), 'k-');
     hold on;
     plot(time_span, pr_values(1:size(time_span, 2), i) - 1738e3 * (i == 1), 'r--');
+    xline(t0, 'b--');
+    xline(t0+t1, 'b--');
+    xline(t0+th, 'b--');
+    xline(t0+th+tv, 'b--');
     hold off;
     grid on;
     title(sprintf('x_{%u}', i));
@@ -152,6 +156,10 @@ for i = 4:1:6
     plot(time_span(1:int32(Ts / h):end), X_values(:, i), 'k-');
     hold on;
     plot(time_span(1:int32(Ts / h):end), prd_values(:, i - 3), 'r--');
+    xline(t0, 'b--');
+    xline(t0+t1, 'b--');
+    xline(t0+th, 'b--');
+    xline(t0+th+tv, 'b--');
     grid on;
     title(sprintf('x_{%u}', i));
     xlabel('time (s)');
@@ -165,6 +173,10 @@ for i = 1:1:3
     hold on;
     plot(time_span(1:int32(Ts / h):end), rad2deg(wrapToPi(X_values(:, i + 6))), 'k-');
     plot(time_span(1:int32(Ts / h):end), rad2deg(Phi_cmd_values(:, i)), 'r--');
+    xline(t0, 'b--');
+    xline(t0+t1, 'b--');
+    xline(t0+th, 'b--');
+    xline(t0+th+tv, 'b--');
     hold off;
     grid on;
     title(sprintf('\\Phi_{%u} vs. \\Phi_{r%u}', i, i));
@@ -176,6 +188,12 @@ end
 for i = 1:1:3
     figure();
     plot(time_span(1:int32(Ts / h):end), rad2deg(Phie_values(:, i)), 'k-');
+    hold on;
+    xline(t0, 'b--');
+    xline(t0+t1, 'b--');
+    xline(t0+th, 'b--');
+    xline(t0+th+tv, 'b--');
+    hold off;
     grid on;
     title(sprintf('\\Phi_{e%u}', i));
     xlabel('time (s)');
@@ -188,6 +206,11 @@ for i = 1:1:3
     plot(time_span(1:int32(Ts / h):end), Omegar_values(:, i), 'r--');
     hold on;
     plot(time_span(1:int32(Ts / h):end), X_values(:, i + 9), 'k-');
+    xline(t0, 'b--');
+    xline(t0+t1, 'b--');
+    xline(t0+th, 'b--');
+    xline(t0+th+tv, 'b--');
+    hold off;
     grid on;
     title(sprintf('\\Omega_{%u} vs. \\Omega_{r%u}', i, i));
     xlabel('time (s)');
@@ -195,31 +218,29 @@ for i = 1:1:3
 end
 
 %%
-figure();
-plot(time_span(1:int32(Ts / h):end), U_values(:, 4), 'k-');
-grid on;
-title('Thrust');
-xlabel('time (s)');
-ylabel(sprintf('F (N)'));
-
-figure();
-plot(time_span(1:int32(Ts / h):end), U_values(:, 5), 'k-');
-grid on;
-title('\beta_1');
-xlabel('time (s)');
-ylabel('\beta_1 (rad)');
-
-figure();
-plot(time_span(1:int32(Ts / h):end), U_values(:, 6), 'k-');
-grid on;
-title('\beta_2');
-xlabel('time (s)');
-ylabel('\beta_2 (rad)');
+for i = 4:1:6
+    figure();
+    plot(time_span(1:int32(Ts / h):end), U_values(:, i), 'k-');
+    hold on;
+    xline(t0, 'b--');
+    xline(t0+t1, 'b--');
+    xline(t0+th, 'b--');
+    xline(t0+th+tv, 'b--');
+    grid on;
+    title(sprintf('u_{%u}', i-3));
+    xlabel('time (s)');
+    ylabel(sprintf('u_{%u}', i-3));
+end
 
 %%
 for i = 1:1:6
     figure();
     plot(time_span(1:int32(Ts / h):end), s_values(:, i), 'k-');
+    hold on;
+    xline(t0, 'b--');
+    xline(t0+t1, 'b--');
+    xline(t0+th, 'b--');
+    xline(t0+th+tv, 'b--');
     grid on;
     title(sprintf('s_{%u}', i));
     xlabel('time (s)');

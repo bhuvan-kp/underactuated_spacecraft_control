@@ -85,9 +85,9 @@ else
     F_a = g2 \ (-c1 * X2e - f2 + X2rd - lambda1 * s1 - eta1 * sign(s1));
 end
 
-% if F_a(1) < 0
-%     F_a(1) = 0;
-% end
+if F_a(1) < 0
+    F_a(1) = 0;
+end
 
 % determine reference attitude
 R = Euler2RotMat(Phi');
