@@ -15,24 +15,24 @@ tf = data(end, 1);
 Ts = 0.001;
 time_span = 0:h:tf;
 
-xr = makima(data(:, 1), data(:, 2), time_span);
-zr = makima(data(:, 1), data(:, 3), time_span);
-vxr = makima(data(:, 1), data(:, 4), time_span);
-vzr = makima(data(:, 1), data(:, 5), time_span);
-thetar = makima(data(:, 1), data(:, 6), time_span);
-omegar = makima(data(:, 1), data(:, 7), time_span);
-mr = makima(data(:, 1), data(:, 8), time_span);
+x_opt = makima(data(:, 1), data(:, 2), time_span);
+z_opt = makima(data(:, 1), data(:, 3), time_span);
+vx_opt = makima(data(:, 1), data(:, 4), time_span);
+vz_opt = makima(data(:, 1), data(:, 5), time_span);
+theta_opt = makima(data(:, 1), data(:, 6), time_span);
+omega_opt = makima(data(:, 1), data(:, 7), time_span);
+m_opt = makima(data(:, 1), data(:, 8), time_span);
 
-Fxr = makima(data(:, 9), data(:, 10), time_span);
-Fzr = makima(data(:, 9), data(:, 11), time_span);
+Fx_opt = makima(data(:, 9), data(:, 10), time_span);
+Fz_opt = makima(data(:, 9), data(:, 11), time_span);
 
-Fr = makima(data(:, 9), sqrt(data(:, 10).^2 + data(:, 11).^2), time_span);
-betar = makima(data(:, 9), atan2(data(:, 10), data(:, 11)), time_span);
+F_opt = makima(data(:, 9), sqrt(data(:, 10).^2 + data(:, 11).^2), time_span);
+beta_opt = makima(data(:, 9), atan2(data(:, 10), data(:, 11)), time_span);
 
 %%
 % Plots of generated trajectory
 figure();
-plot(time_span, xr, 'b-');
+plot(time_span, x_opt, 'b-');
 hold on;
 plot(data(:, 1), data(:, 2), 'r--');
 hold off;
@@ -43,7 +43,7 @@ legend('interpolated', 'optimal');
 grid on;
 
 figure();
-plot(time_span, zr, 'b-');
+plot(time_span, z_opt, 'b-');
 hold on;
 plot(data(:, 1), data(:, 3), 'r--');
 hold off;
@@ -54,7 +54,7 @@ legend('interpolated', 'optimal');
 grid on;
 
 figure();
-plot(xr, zr, 'b-');
+plot(x_opt, z_opt, 'b-');
 hold on;
 plot(data(:, 2), data(:, 3), 'r--');
 hold off;
@@ -66,7 +66,7 @@ legend('interpolated', 'optimal');
 grid on;
 
 figure();
-plot(time_span, vxr, 'b-');
+plot(time_span, vx_opt, 'b-');
 hold on;
 plot(data(:, 1), data(:, 4), 'r--');
 hold off;
@@ -77,7 +77,7 @@ legend('interpolated', 'optimal');
 grid on;
 
 figure();
-plot(time_span, vzr, 'b-');
+plot(time_span, vz_opt, 'b-');
 hold on;
 plot(data(:, 1), data(:, 5), 'r--');
 hold off;
@@ -88,7 +88,7 @@ legend('interpolated', 'optimal');
 grid on;
 
 figure();
-plot(time_span, rad2deg(thetar), 'b-');
+plot(time_span, rad2deg(theta_opt), 'b-');
 hold on;
 plot(data(:, 1), rad2deg(data(:, 6)), 'r--');
 hold off;
@@ -99,7 +99,7 @@ legend('interpolated', 'optimal');
 grid on;
 
 figure();
-plot(time_span, omegar, 'b-');
+plot(time_span, omega_opt, 'b-');
 hold on;
 plot(data(:, 1), data(:, 7), 'r--');
 hold off;
@@ -110,7 +110,7 @@ legend('interpolated', 'optimal');
 grid on;
 
 figure();
-plot(time_span, Fxr, 'b-');
+plot(time_span, Fx_opt, 'b-');
 hold on;
 plot(data(:, 9), data(:, 10), 'r--');
 hold off;
@@ -121,7 +121,7 @@ legend('interpolated', 'optimal');
 grid on;
 
 figure();
-plot(time_span, Fzr, 'b-');
+plot(time_span, Fz_opt, 'b-');
 hold on;
 plot(data(:, 9), data(:, 11), 'r--');
 hold off;
@@ -135,40 +135,22 @@ grid on;
 % storage
 X_values = zeros(int32(tf / Ts), 7);
 U_values = zeros(int32(tf / Ts), 2);
-% s_values = zeros(int32(tf / Ts), 3);
-% Phir_values = zeros(int32(tf / Ts), 1);
-% Phi_cmd_values = zeros(int32(tf / Ts), 3);
-% Phie_values = zeros(int32(tf / Ts), 3);
-% Omegar_values = zeros(int32(tf / Ts), 3);
-% thetadd_values = zeros(int32(tf / Ts), 1);
-% F_values = zeros(int32(tf / Ts), 1);
-% beta1_values = zeros(int32(tf / Ts), 1);
-% beta2_values = zeros(int32(tf / Ts), 1);
+cstate_values = zeros(int32(tf / Ts), 2);
 
 %%
 % RK4 Integration
 X = X_0;
-fstate = [0; 0];
-% thetad_old = 0;
-% Phir = zeros(3, 1);
-% Phird = zeros(3, 1);
-% U_old = zeros(6, 1);
-for t = time_span
-    % [U, s, Phir, Phird, Phie, Omegar, Phi_cmd, thetadd] = control_true(t, X, r_ref_values(int32(t/h) + 1, :)', v_ref_values(int32(t/h) + 1, :)', a_ref_values(int32(t/h) + 1, :)', Phir, Phird, U_old(1:3), h);
-    % U_old = U;
+cstate = [0; 0]; % thetar; thetard
 
-    % [U, fstate] = Control(t, X, [xr(int32(t * 1000) + 1); zr(int32(t * 1000) + 1); vxr(int32(t * 1000) + 1); vzr(int32(t * 1000) + 1); Fxr(int32(t * 1000) + 1); Fzr(int32(t * 1000) + 1)], fstate, h);
-    U = [Fr(int32(t * 1000) + 1); betar(int32(t * 1000) + 1)];
+for t = time_span
+
+    [U, cstate] = Control(t, X, [x_opt(int32(t * 1000) + 1); z_opt(int32(t * 1000) + 1); vx_opt(int32(t * 1000) + 1); vz_opt(int32(t * 1000) + 1); Fx_opt(int32(t * 1000) + 1); Fz_opt(int32(t * 1000) + 1)], cstate, h);
+    % U = [F_opt(int32(t * 1000) + 1); beta_opt(int32(t * 1000) + 1)];
 
     if isequal(mod(int32(t * 1000), int32(Ts * 1000)), int32(0))
         X_values(int32(t / Ts) + 1, :) = X';
         U_values(int32(t / Ts) + 1, :) = U';
-        % s_values(int32(t / Ts) + 1, :) = s';
-        % Phir_values(int32(t / Ts) + 1, :) = Phir';
-        % Phi_cmd_values(int32(t / Ts) + 1, :) = Phi_cmd';
-        % Phie_values(int32(t / Ts) + 1, :) = Phie';
-        % Omegar_values(int32(t / Ts) + 1, :) = Omegar';
-        % thetadd_values(int32(t / Ts) + 1, :) = thetadd;
+        cstate_values(int32(t / Ts) + 1, :) = cstate';
     end
 
     k1 = Dynamics(t, X, U);
@@ -185,7 +167,7 @@ end
 figure();
 plot(time_span, X_values(:, 1), 'b-');
 hold on;
-plot(time_span, xr, 'r--');
+plot(time_span, x_opt, 'r--');
 hold off;
 title('x vs t');
 xlabel('time (s)');
@@ -196,7 +178,7 @@ grid on;
 figure();
 plot(time_span, X_values(:, 2), 'b-');
 hold on;
-plot(time_span, zr, 'r--');
+plot(time_span, z_opt, 'r--');
 hold off;
 title('z vs t');
 xlabel('time (s)');
@@ -207,7 +189,7 @@ grid on;
 figure();
 plot(time_span, X_values(:, 3), 'b-');
 hold on;
-plot(time_span, vxr, 'r--');
+plot(time_span, vx_opt, 'r--');
 hold off;
 title('v_x vs t');
 xlabel('time (s)');
@@ -218,7 +200,7 @@ grid on;
 figure();
 plot(time_span, X_values(:, 4), 'b-');
 hold on;
-plot(time_span, vzr, 'r--');
+plot(time_span, vz_opt, 'r--');
 hold off;
 title('vz vs t');
 xlabel('time (s)');
@@ -227,20 +209,28 @@ legend('v_z', 'v_{z_{ref}}');
 grid on;
 
 figure();
-plot(time_span, rad2deg(wrapToPi(X_values(:, 5))), 'b-');
+plot(time_span, X_values(:, 5), 'b-');
 hold on;
-plot(time_span, rad2deg(thetar), 'r--');
+plot(time_span, cstate_values(:, 1), 'r--');
 hold off;
 title('\theta vs t');
 xlabel('time (s)');
-ylabel('\theta (deg)');
+ylabel('\theta (rad)');
 legend('\theta', '\theta_{ref}');
+grid on;
+
+figure();
+plot(time_span, wrapToPi(cstate_values(:, 1) - X_values(:, 5)), 'b-');
+title('e_\theta vs t');
+xlabel('time (s)');
+ylabel('e_\theta (rad)');
+legend('e_\theta');
 grid on;
 
 figure();
 plot(time_span, X_values(:, 6), 'b-');
 hold on;
-plot(time_span, omegar, 'r--');
+plot(time_span, cstate_values(:, 2), 'r--');
 hold off;
 title('\omega vs t');
 xlabel('time (s)');
@@ -251,7 +241,7 @@ grid on;
 figure();
 plot(time_span, X_values(:, 7), 'b-');
 hold on;
-plot(time_span, mr, 'r--');
+plot(time_span, m_opt, 'r--');
 hold off;
 title('m vs t');
 xlabel('time (s)');
@@ -262,7 +252,7 @@ grid on;
 figure();
 plot(time_span, U_values(:, 1), 'b-');
 hold on;
-plot(time_span, sqrt(Fxr.*Fxr + Fzr.*Fzr), 'r--');
+plot(time_span, sqrt(Fx_opt.*Fx_opt + Fz_opt.*Fz_opt), 'r--');
 hold off;
 title('F vs t');
 xlabel('time (s)');
@@ -273,7 +263,7 @@ grid on;
 figure();
 plot(time_span, rad2deg(U_values(:, 2)), 'b-');
 hold on;
-plot(time_span, rad2deg(atan2(Fxr, Fzr)), 'r--');
+plot(time_span, rad2deg(atan2(Fx_opt, Fz_opt)), 'r--');
 hold off;
 title('\beta vs t');
 xlabel('time (s)');
